@@ -5,19 +5,25 @@
   <title>مولد الشهادات</title>
   <style>
     body {
-      font-family: 'Cairo', sans-serif;
+      font-family: 'Arial', sans-serif;
       text-align: center;
       direction: rtl;
       padding: 20px;
     }
     canvas {
-      border: 1px solid #000;
-      margin-top: 20px;
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #ccc;
     }
     input, button {
       margin: 10px;
       padding: 10px;
       font-size: 16px;
+    }
+    #preview {
+      max-width: 100%;
+      margin-top: 10px;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
@@ -28,53 +34,49 @@
   <input type="text" id="nameInput" placeholder="الاسم">
   <input type="text" id="numberInput" placeholder="رقم الشهادة">
   <br>
-  <button onclick="generateCertificate()">عرض الشهادة</button>
-  <button onclick="downloadCertificate()">تحميل الشهادة</button>
 
-  <canvas id="certCanvas" width="600" height="425" style="display:none;"></canvas>
-  <img id="preview" style="max-width:100%; border:1px solid #ccc; margin-top:10px;" />
+  <button onclick="generate()">عرض الشهادة</button>
+  <button onclick="download()">تحميل الشهادة</button>
+
+  <canvas id="canvas" width="600" height="425" style="display:none;"></canvas>
+  <img id="preview" alt="معاينة الشهادة">
 
   <script>
-    const canvas = document.getElementById("certCanvas");
+    const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const preview = document.getElementById("preview");
 
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.src = "https://raw.githubusercontent.com/midoandbodyemish/And-you-guide-to-the-right-path-/main/IMG_%D9%A2%D9%A0%D9%A2%D9%A5%D9%A0%D9%A4%D9%A0%D9%A5_%D9%A1%D9%A6%D9%A5%D9%A7%D9%A3%D9%A9.jpg";
+    const backgroundImage = new Image();
+    backgroundImage.src = "certificate.jpg"; // لازم تكون موجودة في نفس مجلد الملف
 
-    image.onload = () => {
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    backgroundImage.onload = function () {
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
       preview.src = canvas.toDataURL("image/png");
     };
 
-    function generateCertificate() {
+    function generate() {
       const name = document.getElementById("nameInput").value;
       const number = document.getElementById("numberInput").value;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-      ctx.font = "bold 20px Cairo";
       ctx.fillStyle = "black";
+      ctx.font = "bold 20px Arial";
       ctx.textAlign = "center";
-      ctx.fillText(name, 300, 215); // اسم على الأصفر
+      ctx.fillText(name, 300, 215);  // مكان الاسم (على الأصفر)
 
-      ctx.font = "bold 18px Cairo";
       ctx.fillStyle = "white";
-      ctx.fillText(number, 300, 323); // رقم على الأحمر
+      ctx.font = "bold 18px Arial";
+      ctx.fillText(number, 300, 323); // مكان الرقم (على الأحمر)
 
       preview.src = canvas.toDataURL("image/png");
     }
 
-    function downloadCertificate() {
-      const imageURL = canvas.toDataURL("image/png");
+    function download() {
       const link = document.createElement("a");
-      link.href = imageURL;
       link.download = "شهادتي.png";
-      document.body.appendChild(link);
+      link.href = canvas.toDataURL("image/png");
       link.click();
-      document.body.removeChild(link);
     }
   </script>
 
