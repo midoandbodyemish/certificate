@@ -1,136 +1,359 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@200..1000&family=Lateef:wght@200;300;400;500;600;700;800&family=Reem+Kufi:wght@400..700&family=Ruwudu:wght@400;500;600;700&family=Scheherazade+New:wght@400;500;600;700&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
-  <title>شهادة المتابعة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متابعة الخدمة</title>
+  <!-- إضافة Web Font Loader -->
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    /* إخفاء الصفحة افتراضيًا */
+    html {
+      visibility: hidden;
+      background: #fff; /* شاشة بيضاء */
+    }
+    /* إظهار الصفحة بعد تحميل الخطوط */
+    html.fonts-loaded {
+      visibility: visible;
+    }
     body {
-      font-family: Arial;
-      background: #f0f2f5;
+      font-family: "Scheherazade New", serif;
+      background: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #ffffff;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       text-align: center;
-      padding: 50px;
+      width: 400px;
+    }
+    .container h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 10px 0;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
     .hidden {
       display: none;
     }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      width: 400px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    canvas {
+    #status {
+      font-size: 18px;
+      color: #27ae60;
       margin-top: 20px;
-      border: 1px solid #ccc;
+    }
+    #subscriberCount {
+      font-weight: bold;
+      color: #3498db;
+    }
+    #certificatePreview {
+      margin-top: 20px;
       max-width: 100%;
+      border: 2px solid #3498db;
+      border-radius: 5px;
+    }
+    #loading {
+      display: none;
+      color: red;
+    }
+    #ok{
+      color: green;
+    }
+    #loadingimg {
+      height: 100px;
+      width: 100px;
+      display: none;
+      
     }
   </style>
 </head>
 <body>
-
-<div class="container">
-  <h2>متابعة الخدمة</h2>
-  <div id="subscriptionForm">
-    <input type="text" id="name" placeholder="أدخل اسمك" required>
-    <input type="email" id="email" placeholder="أدخل بريدك الإلكتروني" required>
-    <button id="subscribeBtn">تأكيد المتابعة</button>
+  <div class="container">
+    <h1>متابعة الخدمة</h1>
+    <div id="subscriptionForm" class="hidden">
+      <input type="text" id="name" placeholder="أدخل اسمك" required>
+      <input type="email" id="email" placeholder="أدخل بريدك الإلكتروني" required>
+      <button id="confirmSubscribeBtn">تأكيد المتابعة</button>
+    </div>
+    <button id="toggleSubscribeBtn">تابع الخدمة</button>
+    <p id="status">لم تتابع</p>
+    <p>عدد المتابعين: <span id="subscriberCount">0</span></p>
+    <p id="loading">جاري تحميل الشهادة</p>
+    <center>
+    <img id="loadingimg" src="https://i.top4top.io/p_3397gmkmk0.gif">
+    </center>
+    <img id="certificatePreview" src="" alt="معاينة الشهادة" class="hidden">
   </div>
-  <p id="statusText"></p>
-</div>
 
-<canvas id="certificateCanvas" class="hidden" width="800" height="600"></canvas>
+  <script type="module">
+    // تحميل الخطوط باستخدام Web Font Loader
+    WebFont.load({
+      google: {
+        families: [
+          'Amiri:400,700,400italic,700italic',
+          'Cairo:200,300,400,500,600,700,800,900,1000',
+          'Lateef:200,300,400,500,600,700,800',
+          'Reem Kufi:400,500,600,700',
+          'Ruwudu:400,500,600,700',
+          'Scheherazade New:400,500,600,700'
+        ]
+      },
+      loading: function() {
+        document.documentElement.classList.add('fonts-loading'); // تأكيد الإخفاء
+      },
+      active: function() {
+        document.documentElement.classList.remove('fonts-loading');
+        document.documentElement.classList.add('fonts-loaded'); // إظهار الصفحة
+      },
+      inactive: function() {
+        document.documentElement.classList.remove('fonts-loading');
+        document.documentElement.classList.add('fonts-loaded'); // إظهار الصفحة حتى لو فشل التحميل
+      }
+    });
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    const loading = document.getElementById('loading');
+    const loadingimg = document.getElementById('loadingimg');
+    // إعدادات Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJzK9G2MJieXHmeeHUBdULdNwyxyKQ",
+      authDomain: "khedma-fd534.firebaseapp.com",
+      databaseURL: "https://khedma-fd534-default-rtdb.firebaseio.com",
+      projectId: "khedma-fd534",
+      storageBucket: "khedma-fd534.firebasestorage.app",
+      messagingSenderId: "186556101962",
+      appId: "1:186556101962:web:de1945009a23d99cf83db3",
+      measurementId: "G-JNTZRQ2W4S"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAJzK9G2MJieXHmeeHUBdULdDt8NwyxyKQ",
-    authDomain: "khedma-fd534.firebaseapp.com",
-    databaseURL: "https://khedma-fd534-default-rtdb.firebaseio.com",
-    projectId: "khedma-fd534",
-    storageBucket: "khedma-fd534.appspot.com",
-    messagingSenderId: "186556101962",
-    appId: "1:186556101962:web:de1945009a23d99cf83db3"
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const toggleSubscribeBtn = document.getElementById("toggleSubscribeBtn");
+    const confirmSubscribeBtn = document.getElementById("confirmSubscribeBtn");
+    const statusText = document.getElementById("status");
+    const subscriberCount = document.getElementById("subscriberCount");
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const subscriptionForm = document.getElementById("subscriptionForm");
+    const certificatePreview = document.getElementById("certificatePreview");
 
-  const nameInput = document.getElementById("name");
-  const emailInput = document.getElementById("email");
-  const subscribeBtn = document.getElementById("subscribeBtn");
-  const statusText = document.getElementById("statusText");
+    const TELEGRAM_BOT_TOKEN = "7332970120:AAGitBB77oX2MuvEJg16anXOCUMEqA2lJ1E";
+    const TELEGRAM_CHAT_ID = "6923044013";
 
-  const TELEGRAM_BOT_TOKEN = "7332970120:AAGitBB77oX2MuvEJg16anXOCUMEqA2lJ1E";
-  const TELEGRAM_CHAT_ID = "6923044013";
+    const imageURL = "https://raw.githubusercontent.com/midoandbodyemish/certificate/refs/heads/main/٢٠٢٥٠٤١٩_١٨٢٢١٣.jpg";
 
-  subscribeBtn.addEventListener("click", async () => {
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
-    if (!name || !email) {
-      alert("يرجى إدخال الاسم والبريد الإلكتروني");
-      return;
+    // دالة تحديث عدد المشتركين
+    function updateSubscriberCount() {
+      get(child(ref(db), "subscribers")).then((snapshot) => {
+        let count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+        subscriberCount.textContent = count;
+      }).catch(error => {
+        console.error("Error fetching subscriber count:", error);
+      });
     }
 
-    const userId = email.replace(/[@.]/g, "_");
+    // دالة إرسال الرسالة إلى Telegram
+    function sendTelegramMessage(action, name, email) {
+      get(child(ref(db), "subscribers")).then((snapshot) => {
+        let count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+        let message = action === "subscribe"
+          ? `✅ تمت المتابعة بنجاح!\n👤 الاسم: ${name}\n📧 البريد: ${email}\nعدد المتابعين: ${count}`
+          : `❌ تم إلغاء المتابعة!\n👤 الاسم: ${name}\n📧 البريد: ${email}\nعدد المتابعين: ${count}`;
 
-    await set(ref(db, "subscribers/" + userId), { name, email });
+        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: "HTML"
+          })
+        }).then(response => response.json())
+        .then(data => {
+          console.log(data.ok ? "Telegram message sent." : "Error sending Telegram message:", data);
+        }).catch(error => {
+          console.error("Error sending Telegram message:", error);
+        });
+      });
+    }
 
-    const snapshot = await get(child(ref(db), "subscribers"));
-    const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-    const today = new Date().toLocaleDateString("ar-EG");
+    // دالة إنشاء وتحميل الشهادة
+    function generateCertificate(name, subscriberCount) {
+      console.log("Starting certificate generation for:", name, subscriberCount);
 
-    sendTelegramMessage("✅ تمت المتابعة", name, email, count);
-    generateCertificate(name, today, count);
+      // تحميل الصورة يدويًا
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = imageURL + "?t=" + new Date().getTime();
 
-    statusText.textContent = "تم الاشتراك بنجاح!";
-  });
+      img.onload = () => {
+        console.log("Background image loaded.");
 
-  function sendTelegramMessage(status, name, email, count) {
-    const message = `${status}\n👤 الاسم: ${name}\n📧 البريد: ${email}\nعدد المتابعين: ${count}`;
-    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message
-      })
+        // التأكد من تحميل الخط قبل الرسم
+        document.fonts.load('32px "Scheherazade New"').then(() => {
+          // إنشاء canvas
+          const canvas = document.createElement("canvas");
+          canvas.width = 600;
+          canvas.height = 400;
+          const ctx = canvas.getContext("2d");
+
+          // رسم صورة الخلفية
+          ctx.drawImage(img, 0, 0, 600, 400);
+
+          // إعداد الخط للاسم
+          ctx.font = '32px "Scheherazade New", serif';
+          ctx.fillStyle = "blue";
+          ctx.textAlign = "right";
+          ctx.fillText(`${name}`, 563, 202);
+
+          // إعداد الخط للتاريخ وعدد المشتركين
+          ctx.font = "30px Arial";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "red";
+          ctx.fillText(`${new Date().toLocaleDateString('ar-EG')}`, 190, 385);
+          ctx.fillText(`${subscriberCount}`, 390, 299);
+
+          // عرض الصورة في الصفحة
+          try {
+            const certificateDataURL = canvas.toDataURL("image/png");
+            certificatePreview.src = certificateDataURL;
+            certificatePreview.classList.remove("hidden");
+            loading.innerHTML = '<p id="ok">تم تحميل الشهادة</p>';
+            loadingimg.style.display = 'none';
+            // تحميل الصورة
+            const link = document.createElement("a");
+            link.download = `certificate_${name}.png`;
+            link.href = certificateDataURL;
+            link.click();
+            console.log("Certificate downloaded.");
+          } catch (error) {
+            console.error("Error displaying or downloading certificate:", error);
+            alert("خطأ أثناء عرض أو تحميل الشهادة: " + error.message);
+          }
+        }).catch(error => {
+          console.error("Error loading font:", error);
+          alert("خطأ أثناء تحميل الخط Scheherazade New. جرب مرة أخرى.");
+        });
+      };
+
+      img.onerror = () => {
+        console.error("Failed to load image:", imageURL);
+        alert("خطأ: فشل تحميل صورة الخلفية. جرب استضافة الصورة على Firebase Storage.");
+      };
+    }
+
+    // عند الضغط على زر "تابع الخدمة" أو "إلغاء المتابعة"
+    toggleSubscribeBtn.addEventListener("click", () => {
+      const savedData = localStorage.getItem("subscribed");
+
+      if (savedData) {
+        const userData = JSON.parse(savedData);
+        const userId = userData.email.replace(/[@.]/g, "_");
+
+        remove(ref(db, "subscribers/" + userId)).then(() => {
+          statusText.textContent = "تم الغاء المتابعة";
+          localStorage.removeItem("subscribed");
+          toggleSubscribeBtn.textContent = "تابع الخدمة";
+          updateSubscriberCount();
+          sendTelegramMessage("unsubscribe", userData.name, userData.email);
+          certificatePreview.classList.add("hidden");
+        }).catch(error => {
+          console.error("Error unsubscribing:", error);
+        });
+      } else {
+        subscriptionForm.classList.remove("hidden");
+        toggleSubscribeBtn.classList.add("hidden");
+      }
     });
-  }
 
-  function generateCertificate(name, date, count) {
-    const canvas = document.getElementById("certificateCanvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = "٢٠٢٥٠٤١٩_١٨٢٢١٣.jpg"; // لازم تكون في نفس مجلد الصفحة
+    // عند الضغط على زر "تأكيد الاشتراك"
+    confirmSubscribeBtn.addEventListener("click", () => {
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      if (!name || !email) return alert("يجب إدخال الاسم والبريد الإلكتروني!");
 
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#000";
-      ctx.font = "bold 28px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(`الاسم: ${name}`, canvas.width / 2, 350);
-      ctx.fillText(`التاريخ: ${date}`, canvas.width / 2, 400);
-      ctx.fillText(`عدد المتابعين: ${count}`, canvas.width / 2, 450);
+      const userId = email.replace(/[@.]/g, "_");
 
-      canvas.classList.remove("hidden");
+      set(ref(db, "subscribers/" + userId), { name, email }).then(() => {
+        statusText.textContent = "تمت المتابعة";
+        localStorage.setItem("subscribed", JSON.stringify({ name, email }));
+        toggleSubscribeBtn.textContent = "الغاء المتابعة";
+        subscriptionForm.classList.add("hidden");
+        toggleSubscribeBtn.classList.remove("hidden");
 
-      const link = document.createElement("a");
-      link.download = "شهادة-المتابعة.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    };
-  }
-</script>
+        get(child(ref(db), "subscribers")).then((snapshot) => {
+          let count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+          subscriberCount.textContent = count;
+          sendTelegramMessage("subscribe", name, email);
+          generateCertificate(name, count);
+        }).catch(error => {
+          console.error("Error fetching subscriber count:", error);
+          alert("خطأ أثناء جلب عدد المشتركين.");
+        });
+      }).catch(error => {
+        console.error("Error subscribing:", error);
+        alert("خطأ أثناء الاشتراك.");
+      });
 
+      loading.style.display = 'block';
+      loadingimg.style.display = 'block';
+    });
+
+    // التحقق من الاشتراك السابق
+    const savedData = localStorage.getItem("subscribed");
+    if (savedData) {
+      statusText.textContent = "تمت المتابعة بالفعل";
+      toggleSubscribeBtn.textContent = "الغاء المتابعة";
+    }
+
+    updateSubscriberCount();
+  </script>
 </body>
 </html>
